@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Технологии{% endblock %}
+{% block content %}
+
+<div class="row">
+  <h1>Вот что я умею</h1>
+  {% comment %}
+    Боковой блок со списком технологий 
+    Займет всю ширину блока на мобильном
+    и 25% при размерах экрана ≥768px
+  {% endcomment %}
+  <aside class="col-12 col-md-3">
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item">
+        Python
+      </li>
+      <li class="list-group-item">
+        Django
+      </li>
+      <li class="list-group-item">
+        VS Code
+      </li>
+    </ul>
+  </aside>
+  {% comment %}
+    Статья  
+    Займет всю ширину блока на мобильном
+    и 75% при размерах экрана ≥768px
+  {% endcomment %}
+  <article class="col-12 col-md-9">
+    <p>      
+      На этой странице можно было рассказать о том, какие программные
+       инструменты я использовал. Эта страница могла получиться очень
+        интересной, но не получилась. Все технологии перечислены в списке
+         слева, ну и, конечно, гугл мне в попощь
+    </p>
+  </article>
+</div>
+{% endblock %}

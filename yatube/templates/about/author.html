@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Об авторе проекта{% endblock %}
+
+{% block content %}
+{% load static %}
+
+<h1>Привет, меня зовут Виталий Руденко</h1>
+<p>
+  В программирование я пришёл на волне особой популярности IT-направления.
+   Понимаю, особенно сейчас, что это путь не простой. Но стараюсь находить в
+    себе силы следовать ему. Очень часто хочется всё бросить и жить дальше как
+     жил. Собственно это меня и мотивирует не бросать своё обучение. Хочу
+      изменить свою жизнь. 
+</p>
+<p>
+  А ещё я неплохо играю на электро гитаре. Это позволяет мне отвлечься от учёбы  
+</P>
+
+
+<nav class="nav">
+  <a class="nav-link" href="https://github.com/VitalRu">GitHub</a>
+  <a class="nav-link disabled"
+    href="https://www.linkedin.com/in/виталий-руденко-198897264/" tabindex="-1"
+      aria-disabled="true">Моё резюме</a>
+</nav>
+
+<h3>А это фото моего рабочего места</h3>
+
+<img src="{% static 'img/my_workspace.jpeg' %}" class="rounded float-left"
+  width="300" height="480">
+  <figcaption class="figure-caption">
+    Надо было немного отредактировать фото
+  </figcaption>
+
+
+{% endblock %}
+
+
