@@ -10,6 +10,7 @@ class Group(models.Model):
     description = models.TextField(max_length=200)
 
     class Meta:
+        verbose_name = "Группа"
         verbose_name_plural = 'Группы'
 
     def __str__(self) -> str:
@@ -78,6 +79,7 @@ class Comment(models.Model):
     )
 
     class Meta:
+        verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
 
 
@@ -92,3 +94,14 @@ class Follow(models.Model):
         related_name='following',
         on_delete=models.CASCADE
     )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'author'], name='unique_pair'
+            ),
+            models.CheckConstraint(
+                check=~models.Q(author=models.F('user')),
+                name='author_not_user'
+            )
+        ]

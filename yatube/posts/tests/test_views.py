@@ -71,6 +71,15 @@ class PostPagesTests(TestCase):
             kwargs={'slug': cls.group.slug}
         )
 
+    def check_post_context(self, first, latest):
+        assert first.image == latest.image, (f'Неверное изображение '
+                                             f'поста {latest}')
+        assert first.text == latest.text, f'Неверный текст поста {latest}'
+        assert first.group == latest.group, f'Неверная группа поста {latest}'
+        assert first.author == latest.author, f'Неверный автор поста {latest}'
+        assert first.pub_date == self.post.pub_date, ('Некорректная дата '
+                                                      'публикации поста')
+
     @classmethod
     def tearDownClass(cls):
         super().tearDownClass()
@@ -113,31 +122,7 @@ class PostPagesTests(TestCase):
         )
         first_object = response.context['page_obj'][0]
         latest_post = Post.objects.latest('id')
-        self.assertEqual(
-            first_object.image,
-            latest_post.image,
-            f'Неверное изображение поста {latest_post}'
-        )
-        self.assertEqual(
-            first_object.text,
-            latest_post.text,
-            f'Неверный текст поста {latest_post}'
-        )
-        self.assertEqual(
-            first_object.group,
-            latest_post.group,
-            f'Неверная группа поста {latest_post}'
-        )
-        self.assertEqual(
-            first_object.author,
-            latest_post.author,
-            f'Неверный автор поста {latest_post}'
-        )
-        self.assertEqual(
-            first_object.pub_date,
-            self.post.pub_date,
-            'Некорректная дата публикации поста'
-        )
+        self.check_post_context(first_object, latest_post)
 
     def test_group_list_page_show_correct_context(self):
         """Шаблон group_list сформирован с правильным контекстом."""
@@ -156,29 +141,8 @@ class PostPagesTests(TestCase):
             'Не найден "page_obj" в контексте функции'
         )
         first_object = response.context['page_obj'][0]
-        latest_post = Post.objects.filter(
-            group=self.group
-        ).latest('id')
-        self.assertEqual(
-            first_object.text,
-            latest_post.text,
-            f'Неверный текст поста {latest_post}'
-        )
-        self.assertEqual(
-            first_object.group,
-            latest_post.group,
-            f'Неверная группа поста {latest_post}'
-        )
-        self.assertEqual(
-            first_object.author,
-            latest_post.author,
-            f'Неверный автор поста {latest_post}'
-        )
-        self.assertEqual(
-            first_object.image,
-            latest_post.image,
-            f'Неверное изображение поста {latest_post}'
-        )
+        latest_post = Post.objects.filter(group=self.group).latest('id')
+        self.check_post_context(first_object, latest_post)
 
     def test_profile_page_show_correct_context(self):
         """Шаблон profile сформирован с правильным контекстом."""
@@ -197,34 +161,8 @@ class PostPagesTests(TestCase):
             'Не найден "page_obj" в контексте функции'
         )
         first_object = response.context['page_obj'][0]
-        latest_post = Post.objects.filter(
-            author=self.user
-        ).latest('id')
-        self.assertEqual(
-            first_object.text,
-            latest_post.text,
-            f'Неверный текст поста {latest_post}'
-        )
-        self.assertEqual(
-            first_object.group,
-            latest_post.group,
-            f'Неверная группа поста {latest_post}'
-        )
-        self.assertEqual(
-            first_object.author,
-            latest_post.author,
-            f'Неверный автор поста {latest_post}'
-        )
-        self.assertEqual(
-            first_object.pub_date,
-            self.post.pub_date,
-            'Неверная дата публикации поста'
-        )
-        self.assertEqual(
-            first_object.image,
-            latest_post.image,
-            f'Неверное изображение поста {latest_post}'
-        )
+        latest_post = Post.objects.filter(author=self.user).latest('id')
+        self.check_post_context(first_object, latest_post)
 
     def test_post_detail_pages_show_correct_context(self):
         """Шаблон post_detail сформирован с правильным контекстом."""
@@ -237,31 +175,7 @@ class PostPagesTests(TestCase):
             )
         )
         post = response.context.get('post')
-        self.assertEqual(
-            post.pub_date,
-            self.post.pub_date,
-            'Неверная дата публикации поста'
-        )
-        self.assertEqual(
-            post.group,
-            self.post.group,
-            'Некорректный вывод группы постов'
-        )
-        self.assertEqual(
-            post.author,
-            self.post.author,
-            'Некорректное имя автора поста'
-        )
-        self.assertEqual(
-            post.text,
-            self.post.text,
-            'Некорретный текст поста'
-        )
-        self.assertEqual(
-            post.image,
-            self.post.image,
-            'Неверное изображение поста'
-        )
+        self.check_post_context(post, self.post)
 
     def test_post_edit_page_show_correct_context(self):
         """Шаблон post_edit сформирован с правильным контекстом."""
@@ -408,13 +322,16 @@ class FollowTest(TestCase):
             text='Подписывайтесь!',
             author=cls.author,
         )
+        cls.follow_author = reverse(
+            'posts:profile_follow', kwargs={'username': cls.author}
+        )
 
     def setUp(self):
         self.authorized_client = Client()
         self.user = User.objects.create_user(username='UserNotAuthor')
         self.authorized_client.force_login(self.user)
 
-    def test_follow_unfollow_author(self):
+    def test_follow_author(self):
         """Проверяем сервис подписки на автора"""
         response = self.authorized_client.get(reverse('posts:follow_index'))
         self.assertIn(
@@ -423,14 +340,7 @@ class FollowTest(TestCase):
             'Не найден "page_obj" в контексте функции'
         )
         posts_before_follow = len(response.context['page_obj'])
-        self.authorized_client.post(
-            reverse(
-                'posts:profile_follow',
-                kwargs={
-                    'username': self.author,
-                }
-            ),
-        )
+        self.authorized_client.post(self.follow_author)
         follow = Follow.objects.filter(
             author=self.author, user=self.user
         ).latest('id')
@@ -448,19 +358,28 @@ class FollowTest(TestCase):
             posts_before_follow + follow_author_posts,
             'Не появились посты автора на странице подписок'
         )
-        posts_count_before_unfollow = len(response.context['page_obj'])
+
+    def test_unfollow_author(self):
+        """Проверяем возможность отписаться от автора"""
+
+        response = self.authorized_client.get(reverse('posts:follow_index'))
+        self.authorized_client.post(self.follow_author)
+        response = self.authorized_client.get(reverse('posts:follow_index'))
+        posts_before_unfollow = len(response.context['page_obj'])
+        follow = Follow.objects.filter(
+            author=self.author, user=self.user
+        ).latest('id')
+        follow_author_posts = Post.objects.filter(
+            author=follow.author
+        ).count()
         self.authorized_client.post(
             reverse(
-                'posts:profile_unfollow',
-                kwargs={
-                    'username': follow.author,
-                }
-            ),
+                'posts:profile_unfollow', kwargs={'username': follow.author})
         )
         response = self.authorized_client.get(reverse('posts:follow_index'))
         self.assertEqual(
             len(response.context['page_obj']),
-            posts_count_before_unfollow - follow_author_posts,
+            posts_before_unfollow - follow_author_posts,
             'Посты автора, от которого отписались, остались на странце '
             'follow_index'
         )

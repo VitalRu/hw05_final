@@ -37,6 +37,32 @@ class PostFormTests(TestCase):
             author=cls.user,
             group=cls.group,
         )
+        cls.small_gif = (
+            b'\x47\x49\x46\x38\x39\x61\x02\x00'
+            b'\x01\x00\x80\x00\x00\x00\x00\x00'
+            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+            b'\x0A\x00\x3B'
+        )
+        cls.uploaded = SimpleUploadedFile(
+            name='posts/small.gif',
+            content=cls.small_gif,
+            content_type='image/gif'
+        )
+        cls.small_gif_edit = (
+            b'\x47\x49\x46\x38\x39\x61\x02\x00'
+            b'\x01\x00\x80\x00\x00\x00\x00\x00'
+            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+            b'\x0A\x00\x3B\xFF\xFF\xFF'
+        )
+        cls.uploaded_edit = SimpleUploadedFile(
+            name='small_edit.gif',
+            content=cls.small_gif_edit,
+            content_type='image/gif'
+        )
 
     @classmethod
     def tearDownClass(cls):
@@ -84,23 +110,10 @@ class PostFormTests(TestCase):
         """Валидная форма создает запись в Post."""
 
         post_count = Post.objects.count()
-        small_gif = (
-            b'\x47\x49\x46\x38\x39\x61\x02\x00'
-            b'\x01\x00\x80\x00\x00\x00\x00\x00'
-            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
-            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
-            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
-            b'\x0A\x00\x3B'
-        )
-        uploaded = SimpleUploadedFile(
-            name='small.gif',
-            content=small_gif,
-            content_type='image/gif'
-        )
         form_data = {
             'text': 'Новый тестовый пост',
             'group': self.group.id,
-            'image': uploaded,
+            'image': self.uploaded,
         }
         response = self.authorized_client.post(
             reverse('posts:post_create'),
@@ -135,11 +148,11 @@ class PostFormTests(TestCase):
             latest_post.group.id,
             'Неверное значение группы последнего поста'
         )
-        self.assertTrue(
-            Post.objects.filter(
-                image=latest_post.image
-            ).exists(),
-            f'Не найден пост с картинкой {uploaded.name}'
+        image = form_data['image']
+        self.assertEqual(
+            f'posts/{image}',
+            latest_post.image,
+            f'Не найден пост с картинкой {self.uploaded.name}'
         )
         self.assertEqual(
             latest_post.author,
@@ -151,23 +164,10 @@ class PostFormTests(TestCase):
         """Форма вносит изменения в пост и перезаписывает его в Post"""
 
         post_count = Post.objects.count()
-        small_gif = (
-            b'\x47\x49\x46\x38\x39\x61\x02\x00'
-            b'\x01\x00\x80\x00\x00\x00\x00\x00'
-            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
-            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
-            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
-            b'\x0A\x00\x3B\xFF\xFF\xFF'
-        )
-        uploaded = SimpleUploadedFile(
-            name='small.gif',
-            content=small_gif,
-            content_type='image/gif'
-        )
         form_data = {
             'text': 'Тестовый пост, тестовый текст изменённый',
             'group': self.group.id,
-            'image': uploaded
+            'image': self.uploaded_edit
         }
         response = self.authorized_client.post(
             reverse(
@@ -207,11 +207,11 @@ class PostFormTests(TestCase):
             latest_post.group.id,
             'Редактированный пост не найден'
         )
-        self.assertTrue(
-            Post.objects.filter(
-                image=latest_post.image
-            ).exists(),
-            f'Не найден пост с картинкой {uploaded.name}'
+        image = form_data['image']
+        self.assertEqual(
+            f'posts/{image}',
+            latest_post.image,
+            f'Не найден пост с картинкой {self.uploaded_edit.name}'
         )
         self.assertEqual(
             latest_post.author,
@@ -279,7 +279,17 @@ class CommentFormTests(TestCase):
             'Неверный текст последнего поста'
         )
         self.assertEqual(
-            Post.objects.count(),
+            Comment.objects.count(),
             comment_count + 1,
             'Количество объектов в модели Comment не увеличилось'
+        )
+        self.assertEqual(
+            last_comment.author,
+            self.user,
+            'Не совпадают пользователь и автор комментария'
+        )
+        self.assertEqual(
+            last_comment,
+            self.post.comments.latest('id'),
+            'Неверный комментарий поста'
         )

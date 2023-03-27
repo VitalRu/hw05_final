@@ -36,11 +36,11 @@ def profile(request, username):
     author = get_object_or_404(User, username=username)
     page_obj = get_page(author.posts.all(), AMOUNT_POSTS, request)
     following = request.user.is_authenticated and Follow.objects.filter(
-        user=request.user, author=author
+        user=request.user,
+        author=author,
     ).exists()
     context = {
         'author': author,
-        'user': request.user,
         'page_obj': page_obj,
         'following': following,
     }
@@ -141,11 +141,8 @@ def follow_index(request):
 @login_required
 def profile_follow(request, username):
     author = get_object_or_404(User, username=username)
-    if author != request.user and not Follow.objects.filter(
-        user=request.user,
-        author=author
-    ):
-        Follow.objects.create(
+    if author != request.user:
+        Follow.objects.get_or_create(
             user=request.user,
             author=author,
         )
