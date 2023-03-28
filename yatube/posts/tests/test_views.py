@@ -72,13 +72,21 @@ class PostPagesTests(TestCase):
         )
 
     def check_post_context(self, first, latest):
-        assert first.image == latest.image, (f'Неверное изображение '
-                                             f'поста {latest}')
-        assert first.text == latest.text, f'Неверный текст поста {latest}'
-        assert first.group == latest.group, f'Неверная группа поста {latest}'
-        assert first.author == latest.author, f'Неверный автор поста {latest}'
-        assert first.pub_date == self.post.pub_date, ('Некорректная дата '
-                                                      'публикации поста')
+        self.assertEqual(first.image, latest.image, f'Неверное изображение '
+                                                    f'поста {latest}')
+        self.assertEqual(
+            first.text, latest.text, f'Неверный текст поста {latest}'
+        )
+        self.assertEqual(
+            first.group, latest.group, f'Неверная группа поста {latest}'
+        )
+        self.assertEqual(
+            first.author, latest.author, f'Неверный автор поста {latest}'
+        )
+        self.assertEqual(
+            first.pub_date, self.post.pub_date, 'Некорректная дата '
+                                                'публикации поста'
+        )
 
     @classmethod
     def tearDownClass(cls):
