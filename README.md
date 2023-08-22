@@ -16,17 +16,25 @@
 #### Развертывание проекта на локальном сервере
 
 * Установить и активировать виртуальное окружение (для Windows)
-  - `python -m venv venv`
-  - `source venv/Scripts/activate`
+  ```
+  python -m venv venv
+  source venv/Scripts/activate
+  ```
 
 * Установить и активировать виртуальное окружение (для Linux)
-  - `python3 -m venv venv`
-  - `source venv/bin/activate`
+  ```
+  python3 -m venv venv
+  source venv/bin/activate
+  ```
 
 * Находясь в виртуальном окружении обновить `pip` и установить зависимости
-  - `python -m pip install upgrade pip`
-  - `pip install -r requirements.txt`
+  ```
+  python -m pip install upgrade pip
+  pip install -r requirements.txt
+  ```
 
 * Из каталога, где находится файл `manage.py` запустить проект на локальном
 сервере
-  - `python manage.py runserver`
+  ```
+  python manage.py runserver
+  ```
