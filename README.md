@@ -33,8 +33,13 @@
   pip install -r requirements.txt
   ```
 
-* Из каталога, где находится файл `manage.py` запустить проект на локальном
-сервере
-  ```
-  python manage.py runserver
-  ```
+* Из каталога, где находится файл `manage.py` 
+  - Выполнить миграции
+      ```
+      python manage.py migrate
+      python manage.py makemigrations
+      ```
+  - запустить проект на локальном сервере
+      ```
+      python manage.py runserver
+      ```
