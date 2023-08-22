@@ -1,16 +1,22 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SECRET_KEY = 'f+(xs!c3%0nc*9zhbgold5h(u)cz4@8_&x+t1+%&qd7^!vo+q^'
+SECRET_KEY = os.getenv('SECRET_KEY', default='secret_key')
 
-DEBUG = False
+DEBUG = os.getenv('DEBUG', default='False')
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
     '[::1]',
     'testserver',
+    'www.VitalRu.pythonanywhere.com',
+    'VitalRu.pythonanywhere.com',
 ]
 
 INSTALLED_APPS = [
@@ -25,7 +31,7 @@ INSTALLED_APPS = [
     'core.apps.CoreConfig',
     'about.apps.AboutConfig',
     'sorl.thumbnail',
-    'debug_toolbar',
+    # 'debug_toolbar',
 ]
 
 MIDDLEWARE = [
@@ -36,7 +42,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 INTERNAL_IPS = [
